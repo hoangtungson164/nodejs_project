@@ -1,0 +1,6 @@
+projectKey=sonproj
+serverUrl=http://1.55.215.214:9010
+serverVersion=7.9.1.27448
+dashboardUrl=http://1.55.215.214:9010/dashboard?id=sonproj
+ceTaskId=AW-Jqtka5_80M-FfzX1p
+ceTaskUrl=http://1.55.215.214:9010/api/ce/task?id=AW-Jqtka5_80M-FfzX1p

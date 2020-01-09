@@ -18,6 +18,6 @@ router.delete('/items/:id', verifyToken, ItemController.deleteItem);
 router.get('/me', AuthController.getUser);
 router.post('/login', AuthController.login);
 router.post('/register', AuthController.register);
-router.get('logout', AuthController.logout);
+router.get('/logout', AuthController.logout);
 
 module.exports = router

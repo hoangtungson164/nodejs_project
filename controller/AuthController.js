@@ -1,6 +1,6 @@
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
-var config = require('../config');
+var config = require('../config/config');
 var con = require('../db.js');
 
 exports.register = function (req, res) {
@@ -10,14 +10,13 @@ exports.register = function (req, res) {
   var value = [req.body.name, req.body.email, hashedPassword ];
   var sql2 = "SELECT email FROM user_login WHERE email = " + "'" + req.body.email + "'"
 
-
   con.query(sql2, function (err, result) {
+    if (err) res.status(500).send("Something's wrong with checking email")
     if (result.length > 0) {
       return res.status(500).send("Email is already existed.")
     } else {
       con.query(sql, [value], function (err, result) {
-        if (err) throw err 
-        // return res.status(500).send("There was a problem registering the user.")
+        if (err) return res.status(500).send("There was a problem registering the user.")
         // create a token
         var token = jwt.sign({ id: result.id }, config.secret, {
           expiresIn: 86400 // expires in 24 hours

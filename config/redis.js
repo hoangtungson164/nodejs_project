@@ -14,7 +14,7 @@ exports.PINCODE_PREFIX = '_pincode';
 exports.get = function(key, onResult) {
     client.get(key, function (err, reply) {
 		onResult(err, reply);
-	});;
+	});
 }
 
 exports.set = function(key, value, onResult) {

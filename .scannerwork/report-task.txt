@@ -1,6 +1,7 @@
-projectKey=sonproj
-serverUrl=http://1.55.215.214:9010
-serverVersion=7.9.1.27448
-dashboardUrl=http://1.55.215.214:9010/dashboard?id=sonproj
-ceTaskId=AW-Jqtka5_80M-FfzX1p
-ceTaskUrl=http://1.55.215.214:9010/api/ce/task?id=AW-Jqtka5_80M-FfzX1p
+organization=hoangtungson164
+projectKey=hoangtungson164_nodejs_project
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.3982
+dashboardUrl=https://sonarcloud.io/dashboard?id=hoangtungson164_nodejs_project
+ceTaskId=AW-PEIGn69j2Y_X1NF1o
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AW-PEIGn69j2Y_X1NF1o

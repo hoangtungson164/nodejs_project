@@ -4,23 +4,20 @@ var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var config = require('../config/config');
 var con = require('../config/db');
-var smtpTransport = require('../config/nodemailer')
 var redisApi = require("../config/redis")
 
 var nodemailer = require("nodemailer");
 
 var smtpTransport = nodemailer.createTransport({
-    service: "Gmail",
-    auth: {
-        user: process.env.MAIL_USER, 
-        pass: process.env.MAIL_PASSWORD
-    }
+  service: "Gmail",
+  auth: {
+    user: process.env.MAIL_USER,
+    pass: process.env.MAIL_PASSWORD
+  }
 });
 
-var rand, mailOptions, host, link, hashedPassword, name, email;
+var rand, mailOptions, link, hashedPassword, name, email;
 rand = Math.floor((Math.random() * 100) + 54);
-host = 'localhost://4200'
-      
 
 exports.register = function (req, res) {
   name = req.body.name;
@@ -34,7 +31,7 @@ exports.register = function (req, res) {
     if (result.length > 0) {
       return res.status(500).send("Email is already existed.")
     } else {
-      
+
       link = "http://" + req.get('host') + "/verify?id=" + rand;
 
       mailOptions = {
@@ -44,17 +41,17 @@ exports.register = function (req, res) {
       }
 
       console.log(mailOptions);
-      
-      redisApi.set(redisApi.PINCODE_PREFIX, rand, function (err, reply) {
-        if (err) {
-          console.log('Store pincode error : ' + err);
+
+      redisApi.set(redisApi.PINCODE_PREFIX, rand, function (error, reply) {
+        if (error) {
+          console.log('Store pincode error : ' + error);
         } else {
-          smtpTransport.sendMail(mailOptions, function (error, response) {
-            if (error) {
-              console.log(error);
+          smtpTransport.sendMail(mailOptions, function (error2, response) {
+            if (error2) {
+              console.log(error2);
               res.status(500).send("something wrong with verify");
             } else {
-              console.log("Message sent: success to send verify" );
+              console.log("Message sent: success to send verify");
               res.status(200).send("send verify success");
             }
           });
@@ -64,19 +61,22 @@ exports.register = function (req, res) {
   })
 };
 
-exports.verify = function(req, res) {
+exports.verify = function (req, res) {
 
   var sql = "INSERT INTO user_login (name, email, password) VALUES (?)";
   var value = [name, email, hashedPassword];
 
   redisApi.get(redisApi.PINCODE_PREFIX, function (err, reply) {
-		console.log(reply);
-		if (err) return res.status(404).send("not found");
-    con.query(sql, [value], function (err, result) {
-      if (err) return res.status(500).send("There was a problem registering the user.")
-      res.status(200).send("Email "+ mailOptions.to +" is been Successfully verified");
+    console.log(reply);
+    if (err) return res.status(404).send("not found");
+    con.query(sql, [value], function (error, result) {
+      if (error) {
+        return res.status(500).send("There was a problem registering the user.")
+      } else {
+        res.status(200).send("Email " + mailOptions.to + " is been Successfully verified");
+      }
     });
-	});
+  });
 }
 
 exports.getUser = function (req, res, next) {

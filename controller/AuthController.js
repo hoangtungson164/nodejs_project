@@ -1,7 +1,7 @@
 var jwt = require('jsonwebtoken');
 var bcrypt = require('bcryptjs');
 var config = require('../config/config');
-var con = require('../db.js');
+var con = require('../config/db');
 
 exports.register = function (req, res) {
   var hashedPassword = bcrypt.hashSync(req.body.password, 8);

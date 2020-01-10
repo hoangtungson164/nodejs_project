@@ -1,4 +1,4 @@
-var con = require('../db.js');
+var con = require('../config/db');
 
 exports.get = function (req, res, next) {
     var sql = "SELECT * FROM new_table";

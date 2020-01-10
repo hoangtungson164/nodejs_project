@@ -5,6 +5,7 @@ var bcrypt = require('bcryptjs');
 var config = require('../config/config');
 var con = require('../config/db');
 var smtpTransport = require('../config/nodemailer')
+var redisApi = require("../config/redis")
 
 var nodemailer = require("nodemailer");
 
@@ -18,6 +19,7 @@ var smtpTransport = nodemailer.createTransport({
 
 var rand, mailOptions, host, link, hashedPassword, name, email;
 rand = Math.floor((Math.random() * 100) + 54);
+host = 'localhost://4200'
       
 
 exports.register = function (req, res) {
@@ -33,7 +35,6 @@ exports.register = function (req, res) {
       return res.status(500).send("Email is already existed.")
     } else {
       
-      host = req.get('host');
       link = "http://" + req.get('host') + "/verify?id=" + rand;
 
       mailOptions = {
@@ -44,46 +45,38 @@ exports.register = function (req, res) {
 
       console.log(mailOptions);
       
-      smtpTransport.sendMail(mailOptions, function (error, response) {
-        if (error) {
-          console.log(error);
-          res.status(500).send("something wrong with sending verify link");
+      redisApi.set(redisApi.PINCODE_PREFIX, rand, function (err, reply) {
+        if (err) {
+          console.log('Store pincode error : ' + err);
         } else {
-          res.status(200).send("success to send verify link")
+          smtpTransport.sendMail(mailOptions, function (error, response) {
+            if (error) {
+              console.log(error);
+              res.status(500).send("something wrong with verify");
+            } else {
+              console.log("Message sent: success to send verify" );
+              res.status(200).send("send verify success");
+            }
+          });
         }
-      });
+      })
     }
   })
 };
 
 exports.verify = function(req, res) {
-  console.log('have been in this function')
-  console.log((req.protocol+"://"+req.get('host')))
-  console.log(req.query.id)
-  
+
   var sql = "INSERT INTO user_login (name, email, password) VALUES (?)";
   var value = [name, email, hashedPassword];
 
-  if((req.protocol+"://"+req.get('host'))==("http://"+host))
-  {
-    console.log("Domain is matched. Information is from Authentic email");
-    if(req.query.id==rand)
-    {
-      con.query(sql, [value], function (err, result) {
-        if (err) return res.status(500).send("There was a problem registering the user.")
-        res.status(200).send("Email "+ mailOptions.to +" is been Successfully verified");
-      });
-    }
-    else
-    {
-      console.log("email is not verified");
-      res.status(400).send("Bad Request");
-    }
-  }
-  else
-  {
-    res.status(500).send("Request is from unknown source");
-  }
+  redisApi.get(redisApi.PINCODE_PREFIX, function (err, reply) {
+		console.log(reply);
+		if (err) return res.status(404).send("not found");
+    con.query(sql, [value], function (err, result) {
+      if (err) return res.status(500).send("There was a problem registering the user.")
+      res.status(200).send("Email "+ mailOptions.to +" is been Successfully verified");
+    });
+	});
 }
 
 exports.getUser = function (req, res, next) {
